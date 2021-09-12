@@ -8,61 +8,55 @@ app.use(bodyParser.urlencoded({ extended: true }))
 const dataRouter = require("./Routes/routes")
 app.use(dataRouter)
 
-// const url = "mongodb://localhost:27017/"
-// const dbName = "my_event"
-// let db
 const localUrl = process.env.LOCALURL
 const dbName = process.env.DBNAME
 const url = localUrl+dbName
 
-var db = require('./db/dbConnect')
-const router = require('./Routes/routes')
 require("./config/config")
 
-db.Init(url).then(() => {
-  console.log("Succesfully connected to MongoDB")
-
-  app.post("/quotes", dataRouter)
-})
 
 
-app.listen(process.env.PORT, function() {
-    console.log(`listening on ${process.env.PORT}`)
-    console.log(config.db.connectionString);
-    // console.log(db)
+
+MongoClient.connect(url, (err, db) => {
+  if(err) throw err;
+  // console.log(db);
+  // db = db.db(process.env.dbName)
+
+  db.collection('data', (err, collection) => {
+    
+    app.get("/getData", (req, res) => {
+      collection.find().toArray((err, datas) => {
+        if(!err) res.send(datas)
+      });
+    })
+
+    app.post("/addData", (req, res) => {
+      req.body.dateTime = new Date;
+      collection.insert(req.body, (err, datas) => {
+        if(!err) res.send(datas)
+      });
+    })
+
+    app.listen(process.env.PORT, function() {
+      console.log(`listening on ${process.env.PORT}`)
   })
 
-  
+  })
+})
 // app.get(endpoint, callback)
 app.get('/', (req, res) => {
+      // do something here
     console.log(req.body)
     // console.log(__dirname)
     // Note: __dirname is the current directory you're in.
-    // res.send(req.body)
     res.sendFile(__dirname + '/index.html')
     // res.send('Hello World')
-
-    // do something here
-    // console.log('tadaaam');
-    
-
 })
 
-// app.post('/quotes', db.Submit)
-//  => {
-    // console.log(req.body)
-    // res.send(req.body)
-    // MongoClient.connect(url, (err, client) => {
-        // ... do something here
-            // db = client.db(dbName)
-            // console.log(db.Users)
-            // db.collection('Users').insertOne(req.body)
-            // let tmp = db.collection("Users").find()
-            // console.log(tmp)
-        
-        // console.log('Connected MongoDB')
-      // })
-  // })
+app.listen(process.env.PORT, function() {
+  console.log(`listening on ${process.env.PORT}`)
+})
+
 
 // nodemon
 // Nodemon restarts the server automatically when you save a file that’s used by the server.js. 
