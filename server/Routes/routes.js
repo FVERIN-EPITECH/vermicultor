@@ -1,8 +1,8 @@
-const express = require('express')
-const router = express.Router();
+// const express = require('express')
+// const router = express.Router();
 
-const db = require('../db/dbConnect')
+// const db = require('../db/dbConnect')
 
-router.post('/quotes', db.Submit)
+// router.post('/quotes', db.Submit)
 
-module.exports = router;
+// module.exports = router;
